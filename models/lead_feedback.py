@@ -21,7 +21,6 @@ class LeadFeedback(Entity):
     score: Mapped[int] = mapped_column(Integer, nullable=False)
     strengths: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     improvements: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    idp_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Relationships
     assignment: Mapped["AppraisalLeadAssignment"] = relationship("AppraisalLeadAssignment", back_populates="feedbacks")

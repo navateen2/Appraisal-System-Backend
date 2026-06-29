@@ -34,6 +34,7 @@ class Appraisal(Entity):
     employee_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     status: Mapped[AppraisalStatus] = mapped_column(String(50), nullable=False)
     hr_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    idp_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Relationships
     cycle: Mapped["Cycles"] = relationship("Cycles", back_populates="appraisals")
