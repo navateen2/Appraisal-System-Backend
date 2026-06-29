@@ -9,6 +9,16 @@ from alembic import context
 from config import settings
 from database.connection import Base
 
+from models.user import User
+from models.cycles import Cycles
+from models.appraisal import Appraisal
+from models.appraisal_lead_assignment import AppraisalLeadAssignment
+from models.competencies import Competencies
+from models.lead_feedback import LeadFeedback
+from models.audit import Audit
+from models.self_appraisal import SelfAppraisal
+from models.appraisal_summary import AppraisalSummary
+from models.associations import employee_lead_recommendations
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -50,7 +60,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = get_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -81,7 +91,7 @@ async def run_async_migrations() -> None:
     """
 
     connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        {"sqlalchemy.url": get_url()},
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
