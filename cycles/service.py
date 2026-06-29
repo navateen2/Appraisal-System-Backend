@@ -1,13 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
-from models.cycles import Cycle, CycleStatus
+from models.cycles import Cycles, CycleStatus
 from models.appraisal import Appraisal
 from exceptions import NotFoundException, BadRequestException
 from cycles import repo
 from cycles.schemas import CycleCreate, CycleUpdate, CycleStatusUpdate
 
 
-async def create_cycle(body: CycleCreate, db: AsyncSession) -> Cycle:
+async def create_cycle(body: CycleCreate, db: AsyncSession) -> Cycles:
     return await repo.create(db, name=body.name, start_date=body.start_date, end_date=body.end_date)
 
 
@@ -17,14 +17,14 @@ async def get_all_cycles(db: AsyncSession, status_filter: CycleStatus | None = N
     return await repo.get_all_cycles(db)
 
 
-async def get_cycle_by_id(cycle_id: int, db: AsyncSession) -> Cycle:
+async def get_cycle_by_id(cycle_id: int, db: AsyncSession) -> Cycles:
     cycle = await repo.get_cycle_by_id(cycle_id, db)
     if cycle is None:
         raise NotFoundException(f"Cycle with id {cycle_id} not found")
     return cycle
 
 
-async def update_cycle(cycle_id: int, body: CycleUpdate, db: AsyncSession) -> Cycle:
+async def update_cycle(cycle_id: int, body: CycleUpdate, db: AsyncSession) -> Cycles:
     cycle = await repo.get_cycle_by_id(cycle_id, db)
     if cycle is None:
         raise NotFoundException(f"Cycle with id {cycle_id} not found")
@@ -40,7 +40,7 @@ async def update_cycle(cycle_id: int, body: CycleUpdate, db: AsyncSession) -> Cy
     return cycle
 
 
-async def update_cycle_status(cycle_id: int, body: CycleStatusUpdate, db: AsyncSession) -> Cycle:
+async def update_cycle_status(cycle_id: int, body: CycleStatusUpdate, db: AsyncSession) -> Cycles:
     cycle = await repo.get_cycle_by_id(cycle_id, db)
     if cycle is None:
         raise NotFoundException(f"Cycle with id {cycle_id} not found")
