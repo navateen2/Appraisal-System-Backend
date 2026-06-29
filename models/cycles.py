@@ -4,13 +4,15 @@ Cycles entity — ORM mapped class for table `cycles`.
 
 import enum
 from datetime import date
-from typing import List
+from typing import TYPE_CHECKING, List
 from sqlalchemy import String, Date, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.entity import Entity
-from models.user import User
-from models.appraisal import Appraisal
+
+if TYPE_CHECKING:
+    from models.user import User
+    from models.appraisal import Appraisal
 
 
 class CycleStatus(str, enum.Enum):

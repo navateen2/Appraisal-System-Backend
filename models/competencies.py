@@ -2,12 +2,14 @@
 Competencies entity — ORM mapped class for table `competencies`.
 """
 
-from typing import List
+from typing import TYPE_CHECKING, List
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.entity import Entity
-from models.lead_feedback import LeadFeedback
+
+if TYPE_CHECKING:
+    from models.lead_feedback import LeadFeedback
 
 
 class Competencies(Entity):

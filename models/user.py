@@ -4,16 +4,18 @@ User entity — ORM mapped class for table `users`.
 
 import enum
 from datetime import date
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 from sqlalchemy import String, Date
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.entity import Entity
 from models.associations import employee_lead_recommendations
-from models.cycles import Cycles
-from models.appraisal import Appraisal
-from models.appraisal_lead_assignment import AppraisalLeadAssignment
-from models.audit import Audit
+
+if TYPE_CHECKING:
+    from models.cycles import Cycles
+    from models.appraisal import Appraisal
+    from models.appraisal_lead_assignment import AppraisalLeadAssignment
+    from models.audit import Audit
 
 
 class UserRole(str, enum.Enum):

@@ -2,13 +2,15 @@
 LeadFeedback entity — ORM mapped class for table `lead_feedbacks`.
 """
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from sqlalchemy import Integer, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.entity import Entity
-from models.appraisal_lead_assignment import AppraisalLeadAssignment
-from models.competencies import Competencies
+
+if TYPE_CHECKING:
+    from models.appraisal_lead_assignment import AppraisalLeadAssignment
+    from models.competencies import Competencies
 
 
 class LeadFeedback(Entity):

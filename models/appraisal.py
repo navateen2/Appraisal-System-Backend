@@ -3,17 +3,19 @@ Appraisal entity — ORM mapped class for table `appraisals`.
 """
 
 import enum
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 from sqlalchemy import String, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.entity import Entity
 from models.associations import employee_lead_recommendations
-from models.cycles import Cycles
-from models.user import User
-from models.appraisal_lead_assignment import AppraisalLeadAssignment
-from models.self_appraisal import SelfAppraisal
-from models.appraisal_summary import AppraisalSummary
+
+if TYPE_CHECKING:
+    from models.user import User
+    from models.cycles import Cycles
+    from models.appraisal_lead_assignment import AppraisalLeadAssignment
+    from models.self_appraisal import SelfAppraisal
+    from models.appraisal_summary import AppraisalSummary
 
 
 class AppraisalStatus(str, enum.Enum):

@@ -3,14 +3,16 @@ AppraisalLeadAssignment entity — ORM mapped class for table `appraisal_lead_as
 """
 
 import enum
-from typing import List
+from typing import TYPE_CHECKING, List
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.entity import Entity
-from models.appraisal import Appraisal
-from models.user import User
-from models.lead_feedback import LeadFeedback
+
+if TYPE_CHECKING:
+    from models.appraisal import Appraisal
+    from models.user import User
+    from models.lead_feedback import LeadFeedback
 
 
 class AssignmentStatus(str, enum.Enum):
