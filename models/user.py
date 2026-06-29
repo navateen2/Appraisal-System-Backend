@@ -19,7 +19,6 @@ from models.audit import Audit
 class UserRole(str, enum.Enum):
     HR = "HR"
     Employee = "Employee"
-    Lead = "Lead"
 
 
 class User(Entity):
