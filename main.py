@@ -35,13 +35,9 @@ register_exception_handler(app)
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(appraisal_router)
-<<<<<<< HEAD
 app.include_router(cycle_router)
-
-=======
 app.include_router(competencies_router)
 app.include_router(lead_feedbacks_router)
->>>>>>> b542448 (feat: add competencies api)
 
 @app.get("/health", tags=["Health"])
 async def health_check():
