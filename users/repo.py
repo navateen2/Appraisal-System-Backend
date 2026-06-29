@@ -3,7 +3,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 from models import User
 from models.user import UserRole
 from exceptions import ConflictException

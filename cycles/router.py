@@ -27,7 +27,7 @@ router = APIRouter(prefix="/cycles", tags=["Appraisal Cycles"])
 async def create_new_cycle(
     body: CycleCreate, db: AsyncSession = Depends(get_db), current_user: TokenPayload = Depends(get_current_user)
 ):
-    return await service.create_cycle(db, body, current_user.id)
+    return await service.create_cycle(db=db, body=body, current_user_id=current_user.id)
 
 
 @router.get("", response_model=list[CycleResponse], dependencies=[Depends(require_role(UserRole.HR))])
@@ -37,7 +37,7 @@ async def get_cycles(status: CycleStatus | None = None, db: AsyncSession = Depen
 
 @router.get("/{cycle_id}", response_model=CycleResponse, dependencies=[Depends(require_role(UserRole.HR))])
 async def get_cycle(cycle_id: int, db: AsyncSession = Depends(get_db)):
-    cycle = await service.get_cycle_by_id(db, cycle_id)
+    cycle = await service.get_cycle_by_id(db=db, cycle_id=cycle_id)
     if not cycle:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cycle not found")
     return cycle
@@ -68,7 +68,7 @@ async def delete_cycle(cycle_id: int, db: AsyncSession = Depends(get_db)):
     "/{cycle_id}/assignments", response_model=BulkAssignmentResponse, dependencies=[Depends(require_role(UserRole.HR))]
 )
 async def manage_cycle_assignments(cycle_id: int, body: AssignmentParam, db: AsyncSession = Depends(get_db)):
-    return await service.assign_employees_to_cycle(db, cycle_id, body.employee_ids)
+    return await service.assign_employees_to_cycle(db=db, cycle_id=cycle_id, employee_ids=body.employee_ids)
 
 
 @router.delete("/{cycle_id}/assignments/{employee_id}", dependencies=[Depends(require_role(UserRole.HR))])

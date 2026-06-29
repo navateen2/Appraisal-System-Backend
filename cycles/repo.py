@@ -5,8 +5,10 @@ from models.cycles import Cycles, CycleStatus
 from models.appraisal import Appraisal
 
 
-async def create(db: AsyncSession, name: str, start_date: datetime, end_date: datetime) -> Cycles:
-    cycle = Cycles(name=name, start_date=start_date, end_date=end_date, status=CycleStatus.INITIATED)
+async def create(db: AsyncSession, name: str, start_date: datetime, end_date: datetime, current_user_id: int) -> Cycles:
+    cycle = Cycles(
+        name=name, start_date=start_date, end_date=end_date, status=CycleStatus.Initiated, created_by_id=current_user_id
+    )
     db.add(cycle)
     await db.commit()
     await db.refresh(cycle)
