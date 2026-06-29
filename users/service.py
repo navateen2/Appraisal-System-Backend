@@ -3,7 +3,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from models import User
 from models.user import UserRole
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
 from exceptions import NotFoundException, BadRequestException
 from auth.utils import hash_password
@@ -25,10 +25,10 @@ async def get_all_users(db: AsyncSession):
     return await repo.get_all_users(db)
 
 
-# async def get_filter_users(filter: UserStatus | str, db: AsyncSession):
-#     if filter != "All":
-#         return await repo.get_filter_users(filter, db)
-#     return await repo.get_all_users(db)
+async def get_filter_users(filter: str, db: AsyncSession):
+    if filter != "All":
+        return await repo.get_filter_users(filter, db)
+    return await repo.get_all_users(db)
 
 
 async def get_user_by_name(user_name: str, db: AsyncSession):
