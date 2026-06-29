@@ -34,3 +34,10 @@ async def delete(db: AsyncSession, self_appraisal: SelfAppraisal):
     await db.delete(self_appraisal)
     await db.commit()
     return
+
+async def get_by_appraisal_id(db: AsyncSession, appraisal_id: int):
+    stmt = select(SelfAppraisal).where(
+        SelfAppraisal.appraisal_id == appraisal_id
+    )
+    result = await db.scalars(stmt)
+    return result.first()
