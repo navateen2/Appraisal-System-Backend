@@ -5,6 +5,10 @@ from middleware import configure_middleware
 from auth.router import router as auth_router
 from config import settings
 from exceptions.handler import register_exception_handler
+from users.router import router as user_router
+from appraisals.router import router as appraisal_router
+
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,7 +30,8 @@ app = FastAPI(
 configure_middleware(app)
 register_exception_handler(app)
 app.include_router(auth_router)
-
+app.include_router(user_router)
+app.include_router(appraisal_router)
 
 @app.get("/health", tags=["Health"])
 async def health_check():
