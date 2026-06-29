@@ -3,39 +3,33 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, update
-from sqlalchemy.orm import selectinload
-from models.appraisal import Appraisal,AppraisalStatus
-from models.user import UserRole
 from models.appraisal_lead_reccomendation import ALR
 from exceptions import ConflictException, NotFoundException
 
 
 async def create(
     db: AsyncSession,
-    employee_id: int,
+    reccomended_lead_id: int,
 	appraisal_id: int,
 ) -> ALR:
-    appraisal = Appraisal(
-        cycle_id=cycle_id,
-        employee_id=employee_id,
-        idp_text=idp_text,
-        hr_notes=hr_notes,
-        status=AppraisalStatus.Initiated
+    alr = ALR(
+        reccomended_lead_id=reccomended_lead_id,
+		appraisal_id=appraisal_id,
         )
     
-    db.add(appraisal)
+    db.add(alr)
     try:
         await db.commit()
     except IntegrityError as e:
         await db.rollback()
         print(e)
-        raise ConflictException(f"Appraisal conflict error")
-    await db.refresh(appraisal)
-    return appraisal
+        raise ConflictException(f"Appraisal lead reccomendation conflict error")
+    await db.refresh(alr)
+    return alr
 
 
-async def get_all_appraisals(db: AsyncSession):
-    stmt = select(Appraisal).where(Appraisal.deleted_at.is_(None))
+async def get_all_alrs(db: AsyncSession):
+    stmt = select(ALR).where(ALR.deleted_at.is_(None))
     result = await db.scalars(stmt)
     return result
 
@@ -46,15 +40,15 @@ async def get_all_appraisals(db: AsyncSession):
 #     return result
 
 
-async def get_appraisal_by_id(appraisal_id: int, db: AsyncSession):
-    stmt = select(Appraisal).where(Appraisal.id == appraisal_id, Appraisal.deleted_at.is_(None))
+async def get_ALR_by_id(alr_id: int, db: AsyncSession):
+    stmt = select(ALR).where(ALR.id == alr_id, ALR.deleted_at.is_(None))
     result = await db.scalars(stmt)
-    appraisal = result.first()
-    return appraisal
+    alr = result.first()
+    return alr
 
 
-# async def get_appraisal_by_name(appraisal_name: str, db: AsyncSession):
-#     stmt = select(Appraisal).where(Appraisal.name == appraisal_name, Appraisal.deleted_at.is_(None))
+# async def get_alr_by_name(alr_name: str, db: AsyncSession):
+#     stmt = select(Appraisal).where(Appraisal.name == alr_name, Appraisal.deleted_at.is_(None))
 #     result = await db.scalars(stmt)
 #     user = result.first()
 #     return user
@@ -66,17 +60,16 @@ async def get_appraisal_by_id(appraisal_id: int, db: AsyncSession):
 #     return user.first()
 
 
-async def update_appraisal(
-        appraisal_id:int,
+async def update_alr(
+        alr_id:int,
+		reccomended_lead_id: int,
+		appraisal_id: int,
         db:AsyncSession,
-        idp_text:str,
-        hr_notes:str,
-        status:str,
         ):
     stmt = (
-        update(Appraisal)
-        .where(Appraisal.id == appraisal_id, Appraisal.deleted_at.is_(None))
-        .values(idp_text=idp_text, hr_notes=hr_notes,status=status)
+        update(ALR)
+        .where(ALR.id == alr_id, ALR.deleted_at.is_(None))
+        .values(reccomended_lead_id=reccomended_lead_id,appraisal_id=appraisal_id)
     )
 
     result = await db.execute(stmt)
@@ -87,12 +80,12 @@ async def update_appraisal(
         await db.commit()
     except IntegrityError:
         await db.rollback()
-        raise ConflictException(f"Appraisal conflict")
+        raise ConflictException(f"Appraisal lead reccomendation conflict")
     # await db.refresh(result)
-    return await get_appraisal_by_id(appraisal_id=appraisal_id,db=db)
+    return await get_ALR_by_id(alr_id=alr_id,db=db)
     
 
 
-async def soft_delete_appraisal(appraisal: Appraisal, db: AsyncSession):
+async def soft_delete_alr(alr: ALR, db: AsyncSession):
     await db.commit()
     return
