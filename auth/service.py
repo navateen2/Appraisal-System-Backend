@@ -15,7 +15,7 @@ async def login(db: AsyncSession, email: str, password: str):
         raise UnauthorizedException("Invalid email or password")
     if not verify_password(password, user.password_hash):
         raise UnauthorizedException("Invalid email or password")
-    payload = {"id": user.id, "email": user.email, "role": user.role.value}
+    payload = {"id": user.id, "email": user.email, "role": user.role}
 
     return {
         "access_token": create_access_token(payload),
