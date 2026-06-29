@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from fastapi import Depends, status, APIRouter
 from users import service
-from models.user import UserRole, UserStatus
+from models.user import UserRole
 from users.schemas import UserCreate, UserResponse, UserResponseId
 from auth.dependencies import get_current_user, require_role
 from auth.schemas import TokenPayload
@@ -35,10 +35,10 @@ async def get_all_users(db: AsyncSession = Depends(get_db)):
     return [r for r in results.all()]
 
 
-@router.get("/filter/{filter}", response_model=list[UserResponse], dependencies=[Depends(require_role(UserRole.HR))])
-async def get_filter_users(filter: UserStatus | str, db: AsyncSession = Depends(get_db)):
-    results = await service.get_filter_users(filter, db)
-    return [r for r in results.all()]
+# @router.get("/filter/{filter}", response_model=list[UserResponse], dependencies=[Depends(require_role(UserRole.HR))])
+# async def get_filter_users(filter: UserStatus | str, db: AsyncSession = Depends(get_db)):
+#     results = await service.get_filter_users(filter, db)
+#     return [r for r in results.all()]
 
 
 @router.get("/search/{user_name}")
