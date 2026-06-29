@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import logging
+
+from sqlalchemy.orm import Session
 from middleware import configure_middleware
 from auth.router import router as auth_router
 from config import settings
@@ -9,8 +11,7 @@ from users.router import router as user_router
 from appraisals.router import router as appraisal_router
 from cycles.router import router as cycle_router
 from competencies.router import router as competencies_router
-from lead_feedbacks.router import router as lead_feedbacks_router
-
+# from lead_feedbacks.router import router as lead_feedbacks_router
 
 
 logging.basicConfig(
@@ -22,6 +23,9 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from middleware.listeners import register_audit_listeners
+
+    register_audit_listeners(Session)
     # await
     yield
 
@@ -37,7 +41,8 @@ app.include_router(user_router)
 app.include_router(appraisal_router)
 app.include_router(cycle_router)
 app.include_router(competencies_router)
-app.include_router(lead_feedbacks_router)
+# app.include_router(lead_feedbacks_router)
+
 
 @app.get("/health", tags=["Health"])
 async def health_check():
