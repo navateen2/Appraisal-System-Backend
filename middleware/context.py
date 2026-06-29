@@ -8,7 +8,7 @@ def set_current_user_id(user_id: int | None) -> contextvars.Token:
 
 
 def get_current_user_id() -> int | None:
-    return _current_user_context.get()
+    return _current_user_context.get(1)
 
 
 def reset_current_user_id(token: contextvars.Token) -> None:
