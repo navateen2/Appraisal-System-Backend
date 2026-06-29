@@ -1,5 +1,5 @@
 """
-Appraisal lead reccomendation entity — ORM mapped class for table `appraisal_lead_reccoemendation`.
+Employee lead recomendation entity — ORM mapped class for table `EmployeeLeadRecommendations`.
 """
 
 from sqlalchemy import ForeignKey, Text, UniqueConstraint
@@ -9,11 +9,11 @@ from models.entity import Entity
 from models.appraisal import Appraisal
 
 
-class ALR(Entity):
-    __tablename__ = "ALR"
+class ELR(Entity):
+    __tablename__ = "EmployeeLeadRecomendations"
 
     appraisal_id: Mapped[int] = mapped_column(ForeignKey("appraisals.id"), nullable=False)
-    reccomended_lead_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
+    recommended_lead_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
 
     # Relationships
     appraisal: Mapped["Appraisal"] = relationship("Appraisal", back_populates="summary_report")
