@@ -1,12 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime
-from models.cycles import Cycle, CycleStatus
+from models.cycles import Cycles, CycleStatus
 from models.appraisal import Appraisal
 
 
-async def create(db: AsyncSession, name: str, start_date: datetime, end_date: datetime) -> Cycle:
-    cycle = Cycle(name=name, start_date=start_date, end_date=end_date, status=CycleStatus.INITIATED)
+async def create(db: AsyncSession, name: str, start_date: datetime, end_date: datetime) -> Cycles:
+    cycle = Cycles(name=name, start_date=start_date, end_date=end_date, status=CycleStatus.INITIATED)
     db.add(cycle)
     await db.commit()
     await db.refresh(cycle)
@@ -14,19 +14,19 @@ async def create(db: AsyncSession, name: str, start_date: datetime, end_date: da
 
 
 async def get_all_cycles(db: AsyncSession):
-    stmt = select(Cycle).where(Cycle.deleted_at.is_(None))
+    stmt = select(Cycles).where(Cycles.deleted_at.is_(None))
     result = await db.scalars(stmt)
     return result.all()
 
 
 async def get_filter_cycles(status_filter: CycleStatus, db: AsyncSession):
-    stmt = select(Cycle).where(Cycle.status == status_filter, Cycle.deleted_at.is_(None))
+    stmt = select(Cycles).where(Cycles.status == status_filter, Cycles.deleted_at.is_(None))
     result = await db.scalars(stmt)
     return result.all()
 
 
-async def get_cycle_by_id(cycle_id: int, db: AsyncSession) -> Cycle | None:
-    stmt = select(Cycle).where(Cycle.id == cycle_id, Cycle.deleted_at.is_(None))
+async def get_cycle_by_id(cycle_id: int, db: AsyncSession) -> Cycles | None:
+    stmt = select(Cycles).where(Cycles.id == cycle_id, Cycles.deleted_at.is_(None))
     result = await db.scalars(stmt)
     return result.first()
 
