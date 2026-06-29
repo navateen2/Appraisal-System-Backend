@@ -7,7 +7,7 @@ from config import settings
 from exceptions.handler import register_exception_handler
 from users.router import router as user_router
 from appraisals.router import router as appraisal_router
-
+from cycles.router import router as cycle_router
 
 
 logging.basicConfig(
@@ -32,6 +32,8 @@ register_exception_handler(app)
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(appraisal_router)
+app.include_router(cycle_router)
+
 
 @app.get("/health", tags=["Health"])
 async def health_check():
