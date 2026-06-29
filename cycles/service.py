@@ -7,8 +7,10 @@ from cycles import repo
 from cycles.schemas import CycleCreate, CycleUpdate, CycleStatusUpdate
 
 
-async def create_cycle(body: CycleCreate, db: AsyncSession) -> Cycles:
-    return await repo.create(db, name=body.name, start_date=body.start_date, end_date=body.end_date)
+async def create_cycle(body: CycleCreate, db: AsyncSession, current_user_id: int) -> Cycles:
+    return await repo.create(
+        db, name=body.name, start_date=body.start_date, end_date=body.end_date, current_user_id=current_user_id
+    )
 
 
 async def get_all_cycles(db: AsyncSession, status_filter: CycleStatus | None = None):
@@ -25,7 +27,7 @@ async def get_cycle_by_id(cycle_id: int, db: AsyncSession) -> Cycles:
 
 
 async def update_cycle(cycle_id: int, body: CycleUpdate, db: AsyncSession) -> Cycles:
-    cycle = await repo.get_cycle_by_id(cycle_id, db)
+    cycle = await repo.get_cycle_by_id(cycle_id=cycle_id, db=db)
     if cycle is None:
         raise NotFoundException(f"Cycle with id {cycle_id} not found")
 
@@ -67,11 +69,11 @@ async def soft_delete_cycle(cycle_id: int, db: AsyncSession):
 
 
 async def assign_employees_to_cycle(cycle_id: int, employee_ids: list[int], db: AsyncSession):
-    cycle = await repo.get_cycle_by_id(cycle_id, db)
+    cycle = await repo.get_cycle_by_id(cycle_id=cycle_id, db=db)
     if cycle is None:
         raise NotFoundException(f"Cycle with id {cycle_id} not found")
 
-    existing_assigned = await repo.get_assigned_employee_ids(cycle_id, db)
+    existing_assigned = await repo.get_assigned_employee_ids(cycle_id=cycle_id, db=db)
     existing_set = set(existing_assigned)
 
     to_create = []
@@ -85,7 +87,7 @@ async def assign_employees_to_cycle(cycle_id: int, employee_ids: list[int], db: 
 
     success_items = []
     if to_create:
-        success_items = await repo.add_appraisal_assignments(db, to_create)
+        success_items = await repo.add_appraisal_assignments(db=db, appraisals=to_create)
 
     return {"successfully_assigned": success_items, "already_assigned_employee_ids": skipped_ids}
 
