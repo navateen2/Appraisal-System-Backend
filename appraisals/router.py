@@ -1,7 +1,7 @@
 """User Router"""
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from appraisals.schemas import AppraisalResponse,AppraisalCreate
+from appraisals.schemas import AppraisalResponse,AppraisalCreate, AppraisalUpdate
 from auth.schemas import TokenPayload
 from database import get_db
 from fastapi import Depends, status, APIRouter
@@ -26,7 +26,7 @@ async def create_appraisal(body: AppraisalCreate, db: AsyncSession = Depends(get
         cycle_id=body.cycle_id,
         employee_id=body.employee_id,
         idp_text=body.idp_text,
-        meeting_notes=body.meeting_notes
+        hr_notes=body.hr_notes
     )
     return user
 
@@ -43,35 +43,38 @@ async def get_all_appraisals(db: AsyncSession = Depends(get_db)):
 #     return [r for r in results.all()]
 
 
-@router.get("/search/{user_name}")
-async def get_user_by_name(
-    user_name: str, db: AsyncSession = Depends(get_db), _current_user: TokenPayload = Depends(get_current_user)
+# @router.get("/search/{user_name}")
+# async def get_user_by_name(
+#     user_name: str, db: AsyncSession = Depends(get_db), _current_user: TokenPayload = Depends(get_current_user)
+# ):
+#     result = await service.get_user_by_name(user_name, db)
+#     return result
+
+
+@router.get("/{appraisal_id}", response_model=AppraisalResponse)
+async def get_appraisal_by_id(
+    appraisal_id: int, db: AsyncSession = Depends(get_db), _current_user: TokenPayload = Depends(get_current_user)
 ):
-    result = await service.get_user_by_name(user_name, db)
+    result = await service.get_appraisal_by_id(appraisal_id, db)
     return result
 
 
-@router.get("/{user_id}", response_model=AppraisalResponse)
-async def get_user_by_id(
-    user_id: int, db: AsyncSession = Depends(get_db), _current_user: TokenPayload = Depends(get_current_user)
-):
-    result = await service.get_user_by_id(user_id, db)
-    return result
-
-
-@router.put("/{user_id}", dependencies=[Depends(require_role(UserRole.HR))])
-async def update_user(user_id: int, body: AppraisalCreate, db: AsyncSession = Depends(get_db)):
-    db,
-    id=body.id,
-    cycle_id=body.cycle_id,
-    employee_id=body.employee_id,
-    idp_text=body.idp_text,
-    meeting_notes=body.meeting_notes
-    result = await service.update_user(id, cycle_id, employee_id, idp_text, meeting_notes, db)
+@router.put("/{appraisal_id}", dependencies=[Depends(require_role(UserRole.HR))],response_model=AppraisalResponse)
+async def update_appraisal(appraisal_id: int, body: AppraisalUpdate, db: AsyncSession = Depends(get_db)):
+    idp_text=body.idp_text
+    status_=body.status
+    hr_notes=body.hr_notes
+    result = await service.update_appraisal(
+        appraisal_id=appraisal_id,
+        idp_text=idp_text, 
+        hr_notes=hr_notes, 
+        db=db,
+        status=status_
+        )
     return result
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_role(UserRole.HR))])
 async def soft_delete_Appraisal(appraisal_id: int, db: AsyncSession = Depends(get_db)):
-    await service.soft_delete_user(appraisal_id, db)
+    await service.soft_delete_appraisal(appraisal_id, db)
     return {"message": "appraisal soft deleted"}
