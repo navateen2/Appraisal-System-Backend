@@ -20,9 +20,9 @@ async def create(
     db.add(user)
     try:
         await db.commit()
-    except IntegrityError:
+    except IntegrityError as e:
         await db.rollback()
-        raise ConflictException(f"Email '{email}' is already in use")
+        raise ConflictException(f"Email '{email}' is already in use:{e}")
     await db.refresh(user)
     return user
 
@@ -40,7 +40,7 @@ async def get_filter_users(filter: str, db: AsyncSession):
 
 
 async def get_user_by_id(user_id: int, db: AsyncSession):
-    stmt = select(User).options(selectinload(User.addresses)).where(User.id == user_id, User.deleted_at.is_(None))
+    stmt = select(User).where(User.id == user_id, User.deleted_at.is_(None))
     result = await db.scalars(stmt)
     user = result.first()
     return user
