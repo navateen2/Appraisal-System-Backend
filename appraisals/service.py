@@ -1,14 +1,14 @@
-"""User Service"""
+"""Appraisal Service"""
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.appraisal import Appraisal
+from models.appraisal import Appraisal,AppraisalStatus
 from .schemas import AppraisalResponse,AppraisalCreate,AppraisalResponseId
 from models.user import UserRole
 from datetime import datetime
 
 from exceptions import NotFoundException, BadRequestException
 from auth.utils import hash_password
-from users import repo
+from . import repo
 
 
 async def create(
@@ -16,9 +16,9 @@ async def create(
     cycle_id: int,
     employee_id: int,
     idp_text: str,
-    meeting_notes: str,
+    hr_notes: str,
 ) -> AppraisalResponse:
-    user = await repo.create(db, cycle_id, employee_id,idp_text,meeting_notes)
+    user = await repo.create(db, cycle_id, employee_id,idp_text,hr_notes)
     return user
 
 
@@ -50,24 +50,30 @@ async def update_appraisal(
         appraisal_id: int,
         db: AsyncSession,
         idp_text: str,
-        meeting_notes: str,
-        status
+        hr_notes: str,
+        status: str
         ):
     appraisal = await repo.get_appraisal_by_id(appraisal_id, db)
     if appraisal is None:
         raise NotFoundException(f"Appraisal with id {appraisal_id} not found")
     if not isinstance(idp_text, str) or not idp_text.strip():
+        print(idp_text)
         raise BadRequestException("idp_text must be a non-empty string")
-    if not isinstance(meeting_notes, str):
-        raise BadRequestException("meeting_notes must be a string")
-
+    if not isinstance(hr_notes, str):
+        raise BadRequestException("hr_notes must be a string")
+    try:
+        status_enum = AppraisalStatus(status)
+    except ValueError:
+        raise BadRequestException("Invalid appraisal status")
+    
     appraisal.idp_text = idp_text.strip()
-    appraisal.meeting_notes = meeting_notes.strip()
+    appraisal.hr_notes = hr_notes.strip()
     result = await repo.update_appraisal(
         appraisal_id=appraisal_id,
         db=db,
         idp_text=idp_text,
-        meeting_notes=meeting_notes
+        hr_notes=hr_notes,
+        status=status,
         )
     return result
 

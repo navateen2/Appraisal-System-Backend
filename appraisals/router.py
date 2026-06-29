@@ -26,7 +26,7 @@ async def create_appraisal(body: AppraisalCreate, db: AsyncSession = Depends(get
         cycle_id=body.cycle_id,
         employee_id=body.employee_id,
         idp_text=body.idp_text,
-        meeting_notes=body.meeting_notes
+        hr_notes=body.hr_notes
     )
     return user
 
@@ -59,15 +59,15 @@ async def get_appraisal_by_id(
     return result
 
 
-@router.put("/{appraisal_id}", dependencies=[Depends(require_role(UserRole.HR))])
+@router.put("/{appraisal_id}", dependencies=[Depends(require_role(UserRole.HR))],response_model=AppraisalResponse)
 async def update_appraisal(appraisal_id: int, body: AppraisalUpdate, db: AsyncSession = Depends(get_db)):
-    idp_text=body.idp_text,
+    idp_text=body.idp_text
     status_=body.status
-    meeting_notes=body.meeting_notes
-    result = await service.update_user(
+    hr_notes=body.hr_notes
+    result = await service.update_appraisal(
         appraisal_id=appraisal_id,
         idp_text=idp_text, 
-        meeting_notes=meeting_notes, 
+        hr_notes=hr_notes, 
         db=db,
         status=status_
         )
