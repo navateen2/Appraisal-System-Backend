@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from models import User
-from models.user import UserRole, UserStatus
+from models.user import UserRole
 from exceptions import ConflictException
 
 
@@ -15,10 +15,8 @@ async def create(
     email: str,
     password_hash: str,
     role: UserRole,
-    status: UserStatus,
-    age: int | None = None,
 ) -> User:
-    user = User(name=name, email=email, password_hash=password_hash, age=age, role=role)
+    user = User(name=name, email=email, password_hash=password_hash, role=role)
     db.add(user)
     try:
         await db.commit()
@@ -36,7 +34,7 @@ async def get_all_users(db: AsyncSession):
 
 
 async def get_filter_users(filter: str, db: AsyncSession):
-    stmt = select(User).where(User.deleted_at.is_(None), User.status == UserStatus[filter])
+    stmt = select(User).where(User.deleted_at.is_(None))
     result = await db.scalars(stmt)
     return result
 

@@ -1,5 +1,5 @@
 """
-Employee entity — ORM mapped class for table `users`.
+User entity — ORM mapped class for table `users`.
 """
 
 import enum
@@ -10,16 +10,8 @@ from models.entity import Entity
 
 
 class UserRole(str, enum.Enum):
-    UI = ("UI",)
-    UX = ("UX",)
-    DEVELOPER = "DEVOLOPER"
+    Employee = "Employee"
     HR = "HR"
-
-
-class UserStatus(str, enum.Enum):
-    ACTIVE = "ACTIVE"
-    INACTIVE = "INACTIVE"
-    PROBATION = "PROBATION"
 
 
 class User(Entity):

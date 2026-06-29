@@ -24,10 +24,7 @@ async def create_user(body: UserCreate, db: AsyncSession = Depends(get_db)):
         name=body.name,
         email=body.email,
         password=body.password,
-        age=body.age,
-        address=body.address,
         role=body.role,
-        status=body.status,
     )
     return user
 
@@ -64,9 +61,7 @@ async def get_user_by_id(
 async def update_user(user_id: int, body: UserCreate, db: AsyncSession = Depends(get_db)):
     name = body.name
     email = body.email
-    age = body.age
-    status = body.status
-    result = await service.update_user(user_id, name, email, status.value, age, db)
+    result = await service.update_user(user_id, name, email, db)
     return result
 
 

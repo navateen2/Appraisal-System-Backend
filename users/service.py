@@ -16,12 +16,8 @@ async def create(
     email: str,
     password: str,
     role: UserRole,
-    status: UserStatus,
-    age: int | None = None,
 ) -> User:
-    user = await repo.create(
-        db, name=name, email=email, password_hash=hash_password(password), age=age, role=role, status=status
-    )
+    user = await repo.create(db, name=name, email=email, password_hash=hash_password(password), role=role)
     return user
 
 
@@ -49,7 +45,7 @@ async def get_user_by_id(user_id: int, db: AsyncSession):
     return user
 
 
-async def update_user(user_id: int, name: str, email: str, status: str, age: int | None, db: AsyncSession):
+async def update_user(user_id: int, name: str, email: str, db: AsyncSession):
     user = await repo.get_user_by_id(user_id, db)
     if user is None:
         raise NotFoundException(f"User with id {user_id} not found")
@@ -57,19 +53,9 @@ async def update_user(user_id: int, name: str, email: str, status: str, age: int
         raise BadRequestException("name must be a non-empty string")
     if not isinstance(email, str) or not email.strip():
         raise BadRequestException("email must be a non-empty string")
-    print(status)
-    if not isinstance(status, str) or not status.strip():
-        raise BadRequestException("status must be a non-empty string")
 
-    probation_period = datetime.now(timezone.utc) - timedelta(days=30)
     user.name = name.strip()
     user.email = email.strip()
-    if user.created_at <= probation_period and status != "INACTIVE":
-        user.status = status
-    else:
-        user.status = status
-        raise BadRequestException("Probation period is not over")
-
     result = await repo.update_user(user, email, db)
     return result
 
