@@ -16,6 +16,9 @@ async def _validate_assignment_for_mutation(mapping_id: int, lead_id: int, db: A
         
     if assignment.status == AssignmentStatus.Submitted:
         raise BadRequestException("Cannot modify feedback forms once they have been officially submitted")
+    
+    if assignment.status != AssignmentStatus.Pending:
+        raise BadRequestException("Cannot modify feedback forms not in pending status")
     return assignment
 
 async def save_feedback_form(mapping_id: int, items: List[CreateFeedbackItemRequest], lead_id: int, db: AsyncSession):
@@ -26,7 +29,7 @@ async def save_feedback_form(mapping_id: int, items: List[CreateFeedbackItemRequ
         raise BadRequestException("Feedback form already initialized for this mapping. Use PUT to modify drafts.")
         
     await repo.bulk_create_feedbacks(mapping_id, items, db)
-    return await get_feedback_form(mapping_id, lead_id, UserRole.Employee, db)
+    return await get_feedback_form(mapping_id, db)
 
 async def update_feedback_form(mapping_id: int, items: List[UpdateFeedbackItemRequest], lead_id: int, db: AsyncSession):
     await _validate_assignment_for_mutation(mapping_id, lead_id, db)
@@ -34,16 +37,13 @@ async def update_feedback_form(mapping_id: int, items: List[UpdateFeedbackItemRe
     for item in items:
         await repo.update_or_insert_feedback_item(mapping_id, item, db)
         
-    return await get_feedback_form(mapping_id, lead_id, UserRole.Employee, db)
+    return await get_feedback_form(mapping_id, db)
 
-async def get_feedback_form(mapping_id: int, user_id: int, user_role: str, db: AsyncSession):
+async def get_feedback_form(mapping_id: int, db: AsyncSession):
     assignment = await repo.get_assignment_by_id(mapping_id, db)
     if not assignment:
         raise NotFoundException(f"Assignment mapping with id {mapping_id} not found")
     
-    if user_role == UserRole.Employee and assignment.lead_id != user_id:
-        raise ForbiddenException("Access to view this individual draft form payload is restricted")
-        
     feedbacks = await repo.get_feedbacks_by_mapping_id(mapping_id, db)
     
     formatted_items = [
