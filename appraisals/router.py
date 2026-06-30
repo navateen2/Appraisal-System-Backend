@@ -60,7 +60,7 @@ async def get_all_appraisals(status: AppraisalStatus | None = None, db: AsyncSes
 #     return result
 
 
-@router.get("/{appraisal_id}", response_model=AppraisalResponse, dependencies=Depends(require_role(UserRole.HR, UserRole.Employee)))
+@router.get("/{appraisal_id}", response_model=AppraisalResponse, dependencies=[Depends(require_role(UserRole.HR, UserRole.Employee))])
 async def get_appraisal_by_id(
     appraisal_id: int, db: AsyncSession = Depends(get_db)
 ):

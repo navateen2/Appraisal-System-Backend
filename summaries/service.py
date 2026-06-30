@@ -3,7 +3,7 @@ from datetime import datetime
 from exceptions import NotFoundException, BadRequestException
 from summaries import repo
 from summaries.schemas import SummaryCreate, SummaryUpdate
-from models.appraisal import AppraisalSummary
+from models.appraisal_summary import AppraisalSummary
 
 
 async def generate_summary(body: SummaryCreate, db: AsyncSession) -> AppraisalSummary:

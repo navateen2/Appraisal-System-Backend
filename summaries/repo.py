@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from models.appraisal import AppraisalSummary
+from models.appraisal_summary import AppraisalSummary
 
 
 async def create(db: AsyncSession, appraisal_id: int, summary_text: str) -> AppraisalSummary:
