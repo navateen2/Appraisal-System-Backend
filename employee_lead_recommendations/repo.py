@@ -1,40 +1,45 @@
-"""Appraisal Repo"""
+"""ELR Repo"""
 
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select, update
-from models.employee_lead_recommendation import ELR
+from sqlalchemy import insert, select, update
+from models.associations import employee_lead_recommendations as ELR
 from exceptions import ConflictException, NotFoundException
+from models.user import User
 
 
 async def create(
     db: AsyncSession,
-    reccomended_lead_ids: list[int],
-	appraisal_id: int,
-) -> ELR:
-	await delete_ELRs_by_appraisal_id(appraisal_id=appraisal_id,db=db)
-	for i in reccomended_lead_ids:
-		elr = ELR(
-			reccomended_lead_id=i,
-			appraisal_id=appraisal_id,
-			)
-		
-	db.add(elr)
-	try:
-		await db.commit()
-	except IntegrityError as e:
-		await db.rollback()
-		print(e)
-		raise ConflictException(f"Appraisal lead reccomendation conflict error")
-	await db.refresh(elr)
-	return elr
+    appraisal_id: int,
+    recommended_lead_ids: list[int],
+):
+    await delete_ELRs_by_appraisal_id(db, appraisal_id)
+
+    values = [
+        {
+            "appraisal_id": appraisal_id,
+            "recommended_lead_id": lead_id,
+        }
+        for lead_id in recommended_lead_ids
+    ]
+
+    try:
+        await db.execute(insert(ELR), values)
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise ConflictException(
+            "Lead recommendation conflict."
+        )
+
+    return recommended_lead_ids
 
 
-async def get_all_elrs(db: AsyncSession):
-    stmt = select(ELR).where(ELR.deleted_at.is_(None))
-    result = await db.scalars(stmt)
-    return result
+async def get_all_ELRs(db: AsyncSession):
+    stmt = select(ELR).where(ELR.c.deleted_at.is_(None))
+    result = await db.execute(stmt)
+    return result.mappings().all()
 
 
 # async def get_filter_users(filter: str, db: AsyncSession):
@@ -42,21 +47,40 @@ async def get_all_elrs(db: AsyncSession):
 #     result = await db.scalars(stmt)
 #     return result
 
+async def get_ELRs_by_appraisal_id(
+    appraisal_id: int,
+    db: AsyncSession,
+):
+    stmt = (
+        select(
+            ELR.c.recommended_lead_id,
+            User.name,
+            User.email,
+        )
+        .join(
+            User,
+            User.id == ELR.c.recommended_lead_id,
+        )
+        .where(
+            ELR.c.appraisal_id == appraisal_id,
+            ELR.c.deleted_at.is_(None),
+        )
+    )
 
-async def get_ELRs_by_appraisal_id(appraisal_id: int, db: AsyncSession):
-    stmt = select(ELR).where(ELR.appraisal_id == appraisal_id, ELR.deleted_at.is_(None))
-    result = await db.scalars(stmt)
-    elrs = result.all()
-    return elrs
+    result = await db.execute(stmt)
+
+    return result.mappings().all()
+
+
 
 async def delete_ELRs_by_appraisal_id(appraisal_id: int, db: AsyncSession):
     stmt =(
 		update(ELR)
-		.where(ELR.appraisal_id == appraisal_id, ELR.deleted_at.is_(None))
+		.where(ELR.c.appraisal_id == appraisal_id, ELR.c.deleted_at.is_(None))
     	.values(deleted_at=datetime.now())
 	)
-    result = await db.scalars(stmt)
-    elrs = result.all()
+    result = await db.execute(stmt)
+    elrs = result.mappings().all()
     return elrs
 
 # async def get_elr_by_name(elr_name: str, db: AsyncSession):
@@ -98,6 +122,6 @@ async def delete_ELRs_by_appraisal_id(appraisal_id: int, db: AsyncSession):
     
 
 
-async def soft_delete_elr(elr: ELR, db: AsyncSession):
-    await db.commit()
-    return
+# async def soft_delete_elr(elr: ELR, db: AsyncSession):
+#     await db.commit()
+#     return
