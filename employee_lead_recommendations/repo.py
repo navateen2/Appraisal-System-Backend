@@ -3,7 +3,7 @@
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import insert, select, update
+from sqlalchemy import delete, insert, select, update
 from models.associations import employee_lead_recommendations as ELR
 from exceptions import ConflictException, NotFoundException
 from models.user import User
@@ -14,7 +14,7 @@ async def create(
     appraisal_id: int,
     recommended_lead_ids: list[int],
 ):
-    await delete_ELRs_by_appraisal_id(db, appraisal_id)
+    await delete_ELRs_by_appraisal_id(db=db, appraisal_id=appraisal_id)
 
     values = [
         {
@@ -37,7 +37,7 @@ async def create(
 
 
 async def get_all_ELRs(db: AsyncSession):
-    stmt = select(ELR).where(ELR.c.deleted_at.is_(None))
+    stmt = select(ELR)
     result = await db.execute(stmt)
     return result.mappings().all()
 
@@ -63,7 +63,6 @@ async def get_ELRs_by_appraisal_id(
         )
         .where(
             ELR.c.appraisal_id == appraisal_id,
-            ELR.c.deleted_at.is_(None),
         )
     )
 
@@ -75,13 +74,11 @@ async def get_ELRs_by_appraisal_id(
 
 async def delete_ELRs_by_appraisal_id(appraisal_id: int, db: AsyncSession):
     stmt =(
-		update(ELR)
-		.where(ELR.c.appraisal_id == appraisal_id, ELR.c.deleted_at.is_(None))
-    	.values(deleted_at=datetime.now())
+		delete(ELR)
+		.where(ELR.c.appraisal_id == appraisal_id)
 	)
     result = await db.execute(stmt)
-    elrs = result.mappings().all()
-    return elrs
+    return result.rowcount
 
 # async def get_elr_by_name(elr_name: str, db: AsyncSession):
 #     stmt = select(Appraisal).where(Appraisal.name == elr_name, Appraisal.deleted_at.is_(None))
