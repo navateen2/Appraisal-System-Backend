@@ -10,9 +10,11 @@ from models.user import UserRole
 # from users.schemas import UserCreate, AppraisalResponse, AppraisalResponseId
 from auth.dependencies import get_current_user, require_role
 # from auth.schemas import TokenPayload
+from lead_assignments.router import router as lead_assignment_router
 
 router = APIRouter(prefix="/appraisal", tags=["Appraisals"])
 
+router.include_router(lead_assignment_router)
 
 @router.post(
     "",
