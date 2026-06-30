@@ -47,7 +47,7 @@ async def update_cycle_status(cycle_id: int, body: CycleStatusUpdate, db: AsyncS
     if cycle is None:
         raise NotFoundException(f"Cycle with id {cycle_id} not found")
 
-    if body.status == CycleStatus.COMPLETED:
+    if body.status == CycleStatus.Completed:
         appraisals = await repo.get_active_appraisals_by_cycle(cycle_id, db)
         for app in appraisals:
             if app.status not in ["Meeting Done", "Done"]:

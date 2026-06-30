@@ -76,7 +76,7 @@ async def update_appraisal(appraisal_id: int, body: AppraisalUpdate, db: AsyncSe
     return result
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_role(UserRole.HR))])
+@router.delete("/{appraisal_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_role(UserRole.HR))])
 async def soft_delete_Appraisal(appraisal_id: int, db: AsyncSession = Depends(get_db)):
     await service.soft_delete_appraisal(appraisal_id, db)
     return {"message": "appraisal soft deleted"}

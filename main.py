@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import logging
+
+from sqlalchemy.orm import Session
 from middleware import configure_middleware
 from auth.router import router as auth_router
 from config import settings
@@ -22,6 +24,9 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from middleware.listeners import register_audit_listeners
+
+    register_audit_listeners(Session)
     # await
     yield
 
