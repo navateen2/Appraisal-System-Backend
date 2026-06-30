@@ -45,7 +45,7 @@ async def get_cycle(cycle_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.put("/{cycle_id}", response_model=CycleResponse, dependencies=[Depends(require_role(UserRole.HR))])
 async def update_existing_cycle(cycle_id: int, body: CycleUpdate, db: AsyncSession = Depends(get_db)):
-    cycle = await service.update_cycle(db, cycle_id, body)
+    cycle = await service.update_cycle(cycle_id, body, db)
     if not cycle:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cycle not found")
     return cycle
@@ -53,12 +53,12 @@ async def update_existing_cycle(cycle_id: int, body: CycleUpdate, db: AsyncSessi
 
 @router.patch("/{cycle_id}/status", response_model=CycleResponse, dependencies=[Depends(require_role(UserRole.HR))])
 async def update_status(cycle_id: int, body: CycleStatusUpdate, db: AsyncSession = Depends(get_db)):
-    return await service.update_cycle_status(db, cycle_id, body)
+    return await service.update_cycle_status(cycle_id, body, db)
 
 
 @router.delete("/{cycle_id}", dependencies=[Depends(require_role(UserRole.HR))])
 async def delete_cycle(cycle_id: int, db: AsyncSession = Depends(get_db)):
-    success = await service.soft_delete_cycle(db, cycle_id)
+    success = await service.soft_delete_cycle(cycle_id, db)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cycle not found")
     return {"message": "Cycle soft-deleted successfully"}
@@ -73,7 +73,7 @@ async def manage_cycle_assignments(cycle_id: int, body: AssignmentParam, db: Asy
 
 @router.delete("/{cycle_id}/assignments/{employee_id}", dependencies=[Depends(require_role(UserRole.HR))])
 async def remove_single_assignment(cycle_id: int, employee_id: int, db: AsyncSession = Depends(get_db)):
-    success = await service.remove_employee_assignment(db, cycle_id, employee_id)
+    success = await service.remove_employee_assignment(cycle_id, employee_id, db)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment target record not found")
     return {"message": "Employee assignment track removed successfully from cycle"}
