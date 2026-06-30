@@ -10,6 +10,12 @@ def register_audit_listeners(session_factory):
     def handle_updates_and_deletes(session: Session, flush_context, instances):
         user_id = get_current_user_id()
 
+        # Record new instances before they are flushed and cleared from session.new
+        session._pending_inserts = [
+            instance for instance in session.new
+            if not isinstance(instance, Audit)
+        ]
+
         # 1. Track updates and isolate exact field differentials
         for instance in session.dirty:
             if isinstance(instance, Audit):
@@ -51,13 +57,14 @@ def register_audit_listeners(session_factory):
     @event.listens_for(session_factory, "after_flush")
     def handle_insertions(session: Session, flush_context):
         user_id = get_current_user_id()
+        pending = getattr(session, "_pending_inserts", [])
+        if not pending:
+            return
 
+        audits = []
         # 3. Track brand-new rows safely after the database populates row IDs
-        for instance in session.new:
-            if isinstance(instance, Audit):
-                continue
-
-            session.add(
+        for instance in pending:
+            audits.append(
                 Audit(
                     user_id=user_id,
                     action="INSERT",
@@ -66,3 +73,11 @@ def register_audit_listeners(session_factory):
                     changed_fields=None,
                 )
             )
+
+        # Clear the pending list to prevent any recursion loops
+        session._pending_inserts = []
+
+        if audits:
+            for audit in audits:
+                session.add(audit)
+            session.flush(audits)

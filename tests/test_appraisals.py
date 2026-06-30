@@ -21,6 +21,7 @@ async def test_appraisal_lifecycle(client: AsyncClient, hr_headers, seed_users, 
     appraisal_payload = {
         "cycle_id": cycle_id,
         "employee_id": emp_user.id,
+        "status": "Initiated",
         "idp_text": "Need to learn FastAPI.",
         "hr_notes": "First appraisal"
     }

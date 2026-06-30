@@ -1,8 +1,34 @@
 import asyncio
+import os
+
+# Set DATABASE_URL to a dummy PostgreSQL URL so that module-level create_async_engine
+# parsing with pool_size/max_overflow parameters doesn't throw a SQLite pool TypeError.
+os.environ["DATABASE_URL"] = "postgresql+asyncpg://localhost/dummy"
+os.environ["JWT_SECRET"] = "test_secret_key_placeholder"
+os.environ["JWT_SECRET_REFRESH"] = "test_secret_key_refresh_placeholder"
+os.environ["JWT_EXPIRY_MINUTES"] = "60"
+os.environ["JWT_EXPIRY_REFRESH"] = "30"
+os.environ["JWT_ALGORITHM"] = "HS256"
+os.environ["LITELLM_API_KEY"] = "test_key"
+os.environ["LITELLM_API_BASE"] = "https://api.openai.com"
+os.environ["LITELLM_MODEL"] = "gpt-4"
+
 import pytest
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from httpx import AsyncClient
+
+# Import connection module to monkeypatch its engine and session maker references
+import database.connection
+
+# Use an in-memory SQLite database for testing
+TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+TestSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
+
+# Monkeypatch database connection variables to use SQLite instead of the dummy postgres engine
+database.connection.engine = test_engine
+database.connection.AsyncSessionLocal = TestSessionLocal
 
 from database.connection import Base, get_db
 from main import app
@@ -10,12 +36,13 @@ import models  # Ensure all models are registered on Base
 from auth.utils import hash_password
 from models.user import User, UserRole
 
-# Use an in-memory SQLite database for testing
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+# Teach SQLite how to compile/render PostgreSQL JSONB columns
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.dialects.postgresql import JSONB
 
-test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
-TestSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
-
+@compiles(JSONB, "sqlite")
+def compile_jsonb_sqlite(type_, compiler, **kw):
+    return "JSON"
 @pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for each test session."""
@@ -50,10 +77,12 @@ def override_get_db(db_session: AsyncSession):
     yield
     app.dependency_overrides.pop(get_db, None)
 
+from httpx import ASGITransport
+
 @pytest.fixture
 async def client() -> AsyncGenerator[AsyncClient, None]:
     """Provide an HTTPX AsyncClient targeting the FastAPI application."""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
 @pytest.fixture
