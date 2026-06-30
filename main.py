@@ -14,7 +14,8 @@ from competencies.router import router as competencies_router
 from lead_feedbacks.router import router as lead_feedbacks_router
 from self_appraisals.router import router as self_appraisal_router
 from lead_assignments.router import router as lead_assignments_router
-from employee_lead_recommendations.router import router as elr_router
+from summaries.router import router as appraisal_summary_router
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
@@ -45,7 +46,9 @@ app.include_router(competencies_router)
 app.include_router(lead_feedbacks_router)
 app.include_router(self_appraisal_router)
 app.include_router(lead_assignments_router)
-app.include_router(elr_router)
+app.include_router(appraisal_summary_router)
+
+
 @app.get("/health", tags=["Health"])
 async def health_check():
     return {"status": "healthy", "message": f"Performance Appraisal Management System : {settings.app_env}"}

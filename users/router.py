@@ -41,7 +41,7 @@ async def get_all_users(db: AsyncSession = Depends(get_db)):
 #     return [r for r in results.all()]
 
 
-@router.get("/search/{user_name}")
+@router.get("/search/{user_name}", response_model=UserResponseId)
 async def get_user_by_name(
     user_name: str, db: AsyncSession = Depends(get_db), _current_user: TokenPayload = Depends(get_current_user)
 ):
