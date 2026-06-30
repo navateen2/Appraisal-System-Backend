@@ -22,7 +22,7 @@ async def assign_leads(
     db: AsyncSession = Depends(get_db),
     current_user: TokenPayload = Depends(get_current_user)
 ):
-    return await service.assign_leads_to_appraisal(appraisal_id, body.lead_ids, current_user.id, db) # current user id 
+    return await service.assign_leads_to_appraisal(appraisal_id, body.lead_ids, current_user.id, db)
 
 @router.get(
     "/{appraisal_id}/leads",
