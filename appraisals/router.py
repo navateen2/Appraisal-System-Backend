@@ -10,9 +10,11 @@ from models.user import UserRole
 # from users.schemas import UserCreate, AppraisalResponse, AppraisalResponseId
 from auth.dependencies import get_current_user, require_role
 # from auth.schemas import TokenPayload
+from lead_assignments.router import router as lead_assignment_router
 
 router = APIRouter(prefix="/appraisal", tags=["Appraisals"])
 
+router.include_router(lead_assignment_router)
 
 @router.post(
     "",
@@ -74,7 +76,7 @@ async def update_appraisal(appraisal_id: int, body: AppraisalUpdate, db: AsyncSe
     return result
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_role(UserRole.HR))])
+@router.delete("/{appraisal_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_role(UserRole.HR))])
 async def soft_delete_Appraisal(appraisal_id: int, db: AsyncSession = Depends(get_db)):
     await service.soft_delete_appraisal(appraisal_id, db)
     return {"message": "appraisal soft deleted"}

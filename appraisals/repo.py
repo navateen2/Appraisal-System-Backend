@@ -82,7 +82,7 @@ async def update_appraisal(
 
     result = await db.execute(stmt)
     if result is None:
-        raise NotFoundException
+        raise NotFoundException("Appraisal not found")
 
     try:
         await db.commit()

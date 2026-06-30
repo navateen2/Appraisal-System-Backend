@@ -30,8 +30,7 @@ async def update(db: AsyncSession, self_appraisal: SelfAppraisal):
     return self_appraisal
 
 
-async def delete(db: AsyncSession, self_appraisal: SelfAppraisal):
-    await db.delete(self_appraisal)
+async def soft_delete_self_appraisal(db: AsyncSession, self_appraisal: SelfAppraisal):
     await db.commit()
     return
 
