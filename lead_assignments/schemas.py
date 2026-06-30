@@ -24,3 +24,12 @@ class AssignedLeadProfileResponse(BaseModel):
     status: AssignmentStatus
 
     model_config = ConfigDict(from_attributes=True)
+
+class SubmitFeedbackResponse(BaseModel):
+    mapping_id: int
+    appraisal_id: int
+    lead_id: int
+    status: AssignmentStatus
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
