@@ -8,7 +8,7 @@ from lead_assignments import service
 from lead_assignments.schemas import AssignLeadsRequest, LeadAssignmentResponse, AssignedLeadProfileResponse, SubmitFeedbackResponse
 from typing import List
 
-router = APIRouter()
+router = APIRouter(prefix="/appraisal", tags=["Lead-Assignment"])
 
 @router.post(
     "/{appraisal_id}/leads",
