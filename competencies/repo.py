@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import delete, select, update
@@ -16,12 +18,12 @@ async def create(db: AsyncSession, name: str) -> Competencies:
     return competency
 
 async def get_all_competencies(db: AsyncSession):
-    stmt = select(Competencies)
+    stmt = select(Competencies).where(Competencies.deleted_at.is_(None))
     result = await db.scalars(stmt)
     return result.all()
 
 async def get_competency_by_id(competency_id: int, db: AsyncSession):
-    stmt = select(Competencies).where(Competencies.id == competency_id)
+    stmt = select(Competencies).where(Competencies.id == competency_id, Competencies.deleted_at.is_(None))
     result = await db.scalars(stmt)
     competency = result.first()
     return competency
@@ -29,7 +31,7 @@ async def get_competency_by_id(competency_id: int, db: AsyncSession):
 async def update_competency_direct(competency_id: int, name: str, db: AsyncSession) -> int:
     stmt = (
         update(Competencies)
-        .where(Competencies.id == competency_id)
+        .where(Competencies.id == competency_id, Competencies.deleted_at.is_(None))
         .values(name=name)
     )
     try:
@@ -42,8 +44,9 @@ async def update_competency_direct(competency_id: int, name: str, db: AsyncSessi
 
 async def delete_competency_direct(competency_id: int, db: AsyncSession) -> int:
     stmt = (
-        delete(Competencies)
-        .where(Competencies.id == competency_id)
+        update(Competencies)
+        .where(Competencies.id == competency_id, Competencies.deleted_at.is_(None))
+        .values(deleted_at=datetime.utcnow())
     )
     result = await db.execute(stmt)
     await db.commit()

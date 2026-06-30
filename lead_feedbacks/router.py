@@ -46,7 +46,6 @@ async def update_lead_feedback_form(
 async def get_lead_feedback_form(
     mapping_id: int, 
     db: AsyncSession = Depends(get_db),
-    current_user: TokenPayload = Depends(get_current_user)
 ):
-    result = await service.get_feedback_form(mapping_id, current_user.id, current_user.role, db)
+    result = await service.get_feedback_form(mapping_id, db)
     return result
