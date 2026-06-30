@@ -78,4 +78,6 @@ async def delete_self_appraisal(
     obj = await repo.get_by_id(db, self_appraisal_id)
     if not obj:
         raise NotFoundException("Self appraisal not found")
-    await repo.delete(db, obj)
+    obj.deleted_at = datetime.now()
+    await repo.soft_delete_self_appraisal(db,obj )
+    return
