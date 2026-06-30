@@ -1,4 +1,4 @@
-from sqlalchemy import event
+from sqlalchemy import event, inspect
 from sqlalchemy.orm import Session
 from middleware.context import get_current_user_id
 from models.audit import Audit
@@ -15,7 +15,7 @@ def register_audit_listeners(session_factory):
             if isinstance(instance, Audit):
                 continue
 
-            state = event.inspect(instance)
+            state = inspect(instance)
             changes = {}
             for attr in state.attrs:
                 history = attr.history

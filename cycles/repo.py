@@ -61,5 +61,8 @@ async def get_assignment_by_emp(cycle_id: int, employee_id: int, db: AsyncSessio
     return result.first()
 
 
-async def save_changes(db: AsyncSession):
+async def save_changes(db: AsyncSession, instance=None):
     await db.commit()
+
+    if instance:
+        await db.refresh(instance)
