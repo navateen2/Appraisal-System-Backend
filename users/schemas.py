@@ -17,6 +17,7 @@ class UserResponse(BaseModel):
     name: str
     email: str
     role: str
+    created_at: datetime
 
 
 class UserResponseId(UserResponse):
