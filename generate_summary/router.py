@@ -9,6 +9,7 @@ from . import service
 from generate_summary.schemas import (
     AppraisalSummaryRequest,
     AppraisalSummaryResponse,
+    CycleSummaryResponse,
 )
 
 router = APIRouter(
@@ -27,13 +28,8 @@ async def generate_appraisal_summary(
     db: AsyncSession = Depends(get_db),
     current_user: TokenPayload = Depends(get_current_user),
 ):
-    """
-    Generate an AI summary for an appraisal.
-    """
-
     summary = await service.generate_appraisal_summary(
-        db=db,
-        appraisal_id=payload.appraisal_id,
+        db=db, appraisal_id=payload.appraisal_id, current_user=current_user
     )
 
     if summary is None:
@@ -45,4 +41,20 @@ async def generate_appraisal_summary(
     return AppraisalSummaryResponse(
         appraisal_id=payload.appraisal_id,
         summary=summary,
+    )
+
+
+@router.get(
+    "/cycles/{cycle_id}/appraisal-summaries",
+    response_model=list[CycleSummaryResponse],
+    status_code=status.HTTP_200_OK,
+)
+async def get_cycle_appraisal_summaries(
+    cycle_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.get_cycle_appraisal_summaries(
+        db=db,
+        cycle_id=cycle_id,
     )

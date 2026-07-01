@@ -9,6 +9,7 @@ from models.self_appraisal import SelfAppraisal
 from models.appraisal_lead_assignment import AppraisalLeadAssignment
 from models.lead_feedback import LeadFeedback
 from models.competencies import Competencies
+from models.appraisal_summary import AppraisalSummary
 
 
 async def get_appraisal_summary_data(
@@ -63,6 +64,33 @@ async def get_appraisal_summary_data(
             Competencies.id == LeadFeedback.competency_id,
         )
         .where(Appraisal.id == appraisal_id)
+    )
+
+    result = await db.execute(stmt)
+
+    return result.mappings().all()
+
+
+async def get_cycle_appraisal_summaries(
+    db: AsyncSession,
+    cycle_id: int,
+):
+    stmt = (
+        select(
+            Appraisal.id.label("appraisal_id"),
+            User.id.label("employee_id"),
+            User.name.label("employee_name"),
+            AppraisalSummary.summary,
+        )
+        .join(
+            AppraisalSummary,
+            AppraisalSummary.appraisal_id == Appraisal.id,
+        )
+        .join(
+            User,
+            User.id == Appraisal.employee_id,
+        )
+        .where(Appraisal.cycle_id == cycle_id)
     )
 
     result = await db.execute(stmt)

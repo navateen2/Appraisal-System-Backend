@@ -38,7 +38,7 @@ async def update_cycle(cycle_id: int, body: CycleUpdate, db: AsyncSession) -> Cy
     if body.end_date is not None:
         cycle.end_date = body.end_date
 
-    await repo.save_changes(db)
+    await repo.save_changes(db=db, instance=cycle)
     return cycle
 
 

@@ -1,8 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from openai import AsyncOpenAI
 
+from auth.schemas import TokenPayload
 from config import settings
 from generate_summary import repo
+from summaries.service import get_summary_by_appraisal
+from summaries.router import generate_appraisal_summary as store_in_db
+from summaries.schemas import SummaryCreate
 
 
 SYSTEM_PROMPT = """
@@ -25,13 +29,15 @@ Your summary should contain the following sections:
 
 Do not invent information.
 If a section has no information, mention that it was not provided.
+No prose or markdown only plain text
 """
 
 
-async def generate_appraisal_summary(
-    db: AsyncSession,
-    appraisal_id: int,
-) -> str:
+async def generate_appraisal_summary(db: AsyncSession, appraisal_id: int, current_user: TokenPayload) -> str:
+    appraisal_summary = await get_summary_by_appraisal(appraisal_id=appraisal_id, db=db)
+    if appraisal_summary is not None:
+        return appraisal_summary.summary
+
     appraisal_data = await repo.get_appraisal_summary_data(
         db=db,
         appraisal_id=appraisal_id,
@@ -43,6 +49,8 @@ async def generate_appraisal_summary(
     prompt = _build_prompt(appraisal_data)
 
     summary = await _generate_ai_summary(prompt)
+
+    await store_in_db(db=db, body=SummaryCreate(appraisal_id=appraisal_id, summary=summary), current_user=current_user)
 
     return summary
 
@@ -139,3 +147,13 @@ async def _generate_ai_summary(prompt: str) -> str:
     )
 
     return response.choices[0].message.content.strip()
+
+
+async def get_cycle_appraisal_summaries(
+    db: AsyncSession,
+    cycle_id: int,
+):
+    return await repo.get_cycle_appraisal_summaries(
+        db=db,
+        cycle_id=cycle_id,
+    )

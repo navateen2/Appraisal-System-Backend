@@ -24,7 +24,7 @@ async def get_summary_by_id(summary_id: int, db: AsyncSession) -> AppraisalSumma
 async def get_summary_by_appraisal(appraisal_id: int, db: AsyncSession) -> AppraisalSummary:
     summary = await repo.get_by_appraisal_id(appraisal_id, db)
     if summary is None:
-        raise NotFoundException(f"Summary for appraisal id {appraisal_id} not found")
+        return None
     return summary
 
 
