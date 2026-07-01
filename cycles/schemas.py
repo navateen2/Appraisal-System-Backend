@@ -51,3 +51,10 @@ class AppraisalAssignedItem(BaseModel):
 class BulkAssignmentResponse(BaseModel):
     successfully_assigned: list[AppraisalAssignedItem]
     already_assigned_employee_ids: list[int]
+
+class AppraisalsOfCycle(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    employee_name: str
+    employee_id: int
+    status: str

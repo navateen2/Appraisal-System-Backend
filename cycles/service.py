@@ -98,3 +98,8 @@ async def remove_employee_assignment(cycle_id: int, employee_id: int, db: AsyncS
         raise NotFoundException(f"Assignment for employee {employee_id} in cycle {cycle_id} not found")
     appraisal.deleted_at = datetime.utcnow()
     await repo.save_changes(db)
+
+
+async def get_active_appraisals_by_cycle(cycle_id: int, db: AsyncSession):
+    result = await repo.get_active_appraisals_by_cycle(cycle_id, db)
+    return result

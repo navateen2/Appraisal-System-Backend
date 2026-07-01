@@ -3,6 +3,7 @@ from sqlalchemy import select
 from datetime import datetime
 from models.cycles import Cycles, CycleStatus
 from models.appraisal import Appraisal
+from models.user import User
 
 
 async def create(db: AsyncSession, name: str, start_date: datetime, end_date: datetime, current_user_id: int) -> Cycles:
@@ -34,9 +35,25 @@ async def get_cycle_by_id(cycle_id: int, db: AsyncSession) -> Cycles | None:
 
 
 async def get_active_appraisals_by_cycle(cycle_id: int, db: AsyncSession):
-    stmt = select(Appraisal).where(Appraisal.cycle_id == cycle_id, Appraisal.deleted_at.is_(None))
-    result = await db.scalars(stmt)
-    return result.all()
+    stmt = (
+        select(
+            Appraisal.id,
+            Appraisal.employee_id,
+            Appraisal.status,
+            User.name.label("employee_name"),
+        )
+        .join(
+            User,
+            User.id == Appraisal.employee_id,
+        )
+        .where(
+            Appraisal.cycle_id == cycle_id,
+            Appraisal.deleted_at.is_(None),
+        )
+    )
+
+    result = await db.execute(stmt)
+    return result.mappings().all()
 
 
 async def get_assigned_employee_ids(cycle_id: int, db: AsyncSession) -> list[int]:

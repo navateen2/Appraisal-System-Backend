@@ -1,11 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, status, HTTPException
+from appraisals.schemas import AppraisalResponse
 from database import get_db
 from models.user import UserRole
 from auth.dependencies import require_role, get_current_user
 from auth.schemas import TokenPayload
 from cycles import service
 from cycles.schemas import (
+    AppraisalsOfCycle,
     CycleCreate,
     CycleUpdate,
     CycleStatusUpdate,
@@ -77,3 +79,8 @@ async def remove_single_assignment(cycle_id: int, employee_id: int, db: AsyncSes
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment target record not found")
     return {"message": "Employee assignment track removed successfully from cycle"}
+
+
+@router.post("/{cycle_id}/appraisals", response_model=list[AppraisalsOfCycle], dependencies=[Depends(require_role(UserRole.HR))])
+async def get_active_appraisals(cycle_id: int, db: AsyncSession = Depends(get_db)):
+    return await service.get_active_appraisals_by_cycle(cycle_id, db)
