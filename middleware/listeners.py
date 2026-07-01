@@ -2,6 +2,7 @@ from sqlalchemy import event, inspect
 from sqlalchemy.orm import Session
 from middleware.context import get_current_user_id
 from models.audit import Audit
+from fastapi.encoders import jsonable_encoder
 
 
 def register_audit_listeners(session_factory):
@@ -17,11 +18,15 @@ def register_audit_listeners(session_factory):
 
             state = inspect(instance)
             changes = {}
+
             for attr in state.attrs:
                 history = attr.history
+
                 if history.has_changes():
-                    # Format: {"field_name": [old_value, new_value]}
-                    changes[attr.key] = [history.deleted[0] if history.deleted else None, attr.value]
+                    changes[attr.key] = [
+                        history.deleted[0] if history.deleted else None,
+                        attr.value,
+                    ]
 
             if changes:
                 session.add(
@@ -30,10 +35,9 @@ def register_audit_listeners(session_factory):
                         action="UPDATE",
                         table_name=instance.__tablename__,
                         record_id=getattr(instance, "id"),
-                        changed_fields=changes,
+                        changed_fields=jsonable_encoder(changes),
                     )
                 )
-
         # 2. Track explicit hard deletions
         for instance in session.deleted:
             if isinstance(instance, Audit):
