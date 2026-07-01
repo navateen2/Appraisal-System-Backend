@@ -35,7 +35,7 @@ async def get_cycles(status: CycleStatus | None = None, db: AsyncSession = Depen
     return await service.get_all_cycles(db, status_filter=status)
 
 
-@router.get("/{cycle_id}", response_model=CycleResponse, dependencies=[Depends(require_role(UserRole.HR))])
+@router.get("/{cycle_id}", response_model=CycleResponse)
 async def get_cycle(cycle_id: int, db: AsyncSession = Depends(get_db)):
     cycle = await service.get_cycle_by_id(db=db, cycle_id=cycle_id)
     if not cycle:
