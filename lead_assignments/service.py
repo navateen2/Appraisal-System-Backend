@@ -1,5 +1,3 @@
-import datetime
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from exceptions import ForbiddenException, NotFoundException, BadRequestException
 from lead_assignments import repo
@@ -121,7 +119,7 @@ async def submit_lead_feedback(mapping_id: int, current_user_id: int, db: AsyncS
         "appraisal_id": updated_assignment.appraisal_id,
         "lead_id": updated_assignment.lead_id,
         "status": updated_assignment.status,
-        "updated_at": updated_assignment.updated_at
+        "updated_at": updated_assignment.updated_at,
     }
 
 
@@ -130,15 +128,21 @@ async def get_pending_assignments_for_lead(lead_id: int, current_user_id: int, d
         raise ForbiddenException("Access denied: You cannot view pending assignments for another user.")
 
     assignments = await repo.get_pending_assignments_by_lead_id(lead_id, db)
+    print(assignments)
 
     return [
         {
             "id": entry.id,
             "appraisal_id": entry.appraisal_id,
             "lead_id": entry.lead_id,
+            "employee_id": entry.employee_id,
+            "employee_name": entry.employee_name,
             "assigned_by": entry.assigned_by,
             "status": entry.status,
             "created_at": entry.created_at,
+            "deleted_at": entry.get("deleted_at"),
+            "start_date": entry.start_date,
+            "end_date": entry.end_date,
         }
         for entry in assignments
     ]

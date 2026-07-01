@@ -29,7 +29,7 @@ async def create_user(body: UserCreate, db: AsyncSession = Depends(get_db)):
     return user
 
 
-@router.get("", response_model=list[UserResponse], dependencies=[Depends(require_role(UserRole.HR))])
+@router.get("", response_model=list[UserResponse])
 async def get_all_users(db: AsyncSession = Depends(get_db)):
     results = await service.get_all_users(db)
     return [r for r in results.all()]
