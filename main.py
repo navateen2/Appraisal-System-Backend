@@ -16,7 +16,6 @@ from self_appraisals.router import router as self_appraisal_router
 from lead_assignments.router import router as lead_assignments_router
 from summaries.router import router as appraisal_summary_router
 from employee_lead_recommendations.router import router as employee_lead_recommendations_router
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
@@ -49,7 +48,6 @@ app.include_router(self_appraisal_router)
 app.include_router(lead_assignments_router)
 app.include_router(appraisal_summary_router)
 app.include_router(employee_lead_recommendations_router)
-
 
 @app.get("/health", tags=["Health"])
 async def health_check():
