@@ -81,6 +81,6 @@ async def remove_single_assignment(cycle_id: int, employee_id: int, db: AsyncSes
     return {"message": "Employee assignment track removed successfully from cycle"}
 
 
-@router.post("/{cycle_id}/appraisals", response_model=list[AppraisalsOfCycle], dependencies=[Depends(require_role(UserRole.HR))])
+@router.get("/{cycle_id}/appraisals", response_model=list[AppraisalsOfCycle], dependencies=[Depends(require_role(UserRole.HR))])
 async def get_active_appraisals(cycle_id: int, db: AsyncSession = Depends(get_db)):
     return await service.get_active_appraisals_by_cycle(cycle_id, db)
