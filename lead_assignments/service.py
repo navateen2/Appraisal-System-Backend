@@ -121,7 +121,7 @@ async def submit_lead_feedback(mapping_id: int, current_user_id: int, db: AsyncS
         "appraisal_id": updated_assignment.appraisal_id,
         "lead_id": updated_assignment.lead_id,
         "status": updated_assignment.status,
-        "updated_at": datetime.utcnow(),
+        "updated_at": updated_assignment.updated_at
     }
 
 

@@ -70,3 +70,4 @@ async def get_my_pending_assignments(
     current_user: TokenPayload = Depends(get_current_user)
 ):
     return await service.get_pending_assignments_for_lead(lead_id, current_user.id, db)
+

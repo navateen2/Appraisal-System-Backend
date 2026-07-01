@@ -153,5 +153,5 @@ async def update_appraisal_status(
     
     return UpdateStatusResponse(
         message="Appraisal status updated successfully",
-        master_status=updated_appraisal.status
+        status=updated_appraisal.status
     )
