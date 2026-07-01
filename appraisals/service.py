@@ -59,7 +59,7 @@ async def soft_delete_appraisal(appraisal_id: int, db: AsyncSession):
 
 
 async def create_or_update_idp(db: AsyncSession, appraisal_id: int, idp_text: str) -> Appraisal:
-    appraisal = await repo.get_appraisal_by_id(db, appraisal_id)
+    appraisal = await repo.get_appraisal_by_id(appraisal_id,db)
     if not appraisal:
         raise NotFoundException(f"Appraisal with ID {appraisal_id} not found.")
 
@@ -71,7 +71,7 @@ async def create_or_update_idp(db: AsyncSession, appraisal_id: int, idp_text: st
 
 async def create_or_update_meeting_notes(db: AsyncSession, appraisal_id: int, meeting_notes: str) -> Appraisal:
 
-    appraisal = await repo.get_appraisal_by_id(db, appraisal_id)
+    appraisal = await repo.get_appraisal_by_id(appraisal_id,db)
     if not appraisal:
         raise NotFoundException(f"Appraisal with ID {appraisal_id} not found.")
 
@@ -85,14 +85,14 @@ async def create_or_update_meeting_notes(db: AsyncSession, appraisal_id: int, me
 
 
 async def get_idp_text(db: AsyncSession, appraisal_id: int) -> Appraisal:
-    appraisal = await repo.get_appraisal_by_id(db, appraisal_id)
+    appraisal = await repo.get_appraisal_by_id(appraisal_id,db)
     if not appraisal:
         raise NotFoundException(f"Appraisal with ID {appraisal_id} not found.")
     return appraisal
 
 
 async def get_meeting_notes(db: AsyncSession, appraisal_id: int) -> Appraisal:
-    appraisal = await repo.get_appraisal_by_id(db, appraisal_id)
+    appraisal = await repo.get_appraisal_by_id(appraisal_id,db)
     if not appraisal:
         raise NotFoundException(f"Appraisal with ID {appraisal_id} not found.")
     return appraisal
