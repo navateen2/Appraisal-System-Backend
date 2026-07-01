@@ -88,7 +88,7 @@ async def get_employee_appraisal_history(db: AsyncSession, employee_id: int) -> 
     stmt = (
         select(Appraisal)
         .options(joinedload(Appraisal.cycle))
-        .filter(Appraisal.employee_id == employee_id, Appraisal.deleted_at is None)
+        .filter(Appraisal.employee_id == employee_id, Appraisal.deleted_at.is_(None))
     )
     result = await db.execute(stmt)
     return list(result.scalars().all())

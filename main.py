@@ -17,6 +17,7 @@ from lead_assignments.router import router as lead_assignments_router
 from summaries.router import router as appraisal_summary_router
 from employee_lead_recommendations.router import router as employee_lead_recommendations_router
 from generate_summary.router import router as generate_summary_router
+from assistant.router import router as assistant_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -51,6 +52,7 @@ app.include_router(lead_assignments_router)
 app.include_router(appraisal_summary_router)
 app.include_router(employee_lead_recommendations_router)
 app.include_router(generate_summary_router)
+app.include_router(assistant_router)
 
 
 @app.get("/health", tags=["Health"])
