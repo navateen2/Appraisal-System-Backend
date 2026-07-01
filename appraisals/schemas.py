@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
 from models.appraisal import AppraisalStatus
+from models.cycles import CycleStatus
 # from models.user import UserRole
 
 
@@ -11,15 +12,19 @@ class AppraisalCreate(BaseModel):
     cycle_id: int
     employee_id: int
 
+
 class AppraisalResponse(AppraisalCreate):
     status: AppraisalStatus
     id: int
 
+
 class IDPCreateUpdate(BaseModel):
     idp_text: str = Field(..., min_length=1, description="The Individual Development Plan text")
 
+
 class MeetingNotesCreateUpdate(BaseModel):
     meeting_notes: str = Field(..., min_length=1, description="Notes captured by HR during the meeting")
+
 
 class IDPResponse(BaseModel):
     idp_text: Optional[str] = None
@@ -27,6 +32,7 @@ class IDPResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class MeetingNotesResponse(BaseModel):
     message: str
@@ -36,6 +42,7 @@ class MeetingNotesResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class MeetingNotesGetResponse(BaseModel):
     meeting_notes: Optional[str] = None
     updated_at: datetime
@@ -43,15 +50,17 @@ class MeetingNotesGetResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class CycleDetailSchema(BaseModel):
     cycle_id: int
     cycle_name: str
     start_date: datetime
     end_date: datetime
-    cycle_status: datetime
+    cycle_status: CycleStatus
 
     class Config:
         from_attributes = True
+
 
 class EmployeeHistoryResponse(BaseModel):
     id: int
@@ -65,8 +74,10 @@ class EmployeeHistoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class UpdateStatusRequest(BaseModel):
     status: AppraisalStatus
+
 
 class UpdateStatusResponse(BaseModel):
     message: str
