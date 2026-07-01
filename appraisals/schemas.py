@@ -19,11 +19,11 @@ class AppraisalResponse(AppraisalCreate):
 
 
 class IDPCreateUpdate(BaseModel):
-    idp_text: str = Field(..., min_length=1, description="The Individual Development Plan text")
+    idp_text: str = Field(..., description="The Individual Development Plan text")
 
 
 class MeetingNotesCreateUpdate(BaseModel):
-    meeting_notes: str = Field(..., min_length=1, description="Notes captured by HR during the meeting")
+    meeting_notes: str = Field(..., description="Notes captured by HR during the meeting")
 
 
 class IDPResponse(BaseModel):

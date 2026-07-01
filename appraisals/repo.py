@@ -74,7 +74,6 @@ async def soft_delete_appraisal(appraisal: Appraisal, db: AsyncSession):
 
 async def update_appraisal_idp(db: AsyncSession, appraisal: Appraisal, idp_text: str) -> Appraisal:
     appraisal.idp_text = idp_text
-    appraisal.updated_at = datetime.utcnow()
     
     await db.commit()
     await db.refresh(appraisal)
@@ -83,7 +82,6 @@ async def update_appraisal_idp(db: AsyncSession, appraisal: Appraisal, idp_text:
 
 async def update_appraisal_hr_notes(db: AsyncSession, appraisal: Appraisal, hr_notes: str) -> Appraisal:
     appraisal.hr_notes = hr_notes
-    appraisal.updated_at = datetime.utcnow()
     
     await db.commit()
     await db.refresh(appraisal)
