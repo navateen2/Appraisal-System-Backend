@@ -23,7 +23,7 @@ async def create(
     return user
 
 
-async def get_all_appraisals(db: AsyncSession, status: str|None):
+async def get_all_appraisals(db: AsyncSession, status: str | None):
     return await repo.get_all_appraisals(db, status)
 
 
@@ -46,26 +46,26 @@ async def get_appraisal_by_id(appraisal_id: int, db: AsyncSession):
         raise NotFoundException(f"Appraisal with id: {appraisal_id} not found")
     return appraisal
 
+
 async def soft_delete_appraisal(appraisal_id: int, db: AsyncSession):
     appraisal = await repo.get_appraisal_by_id(appraisal_id, db)
     if appraisal is None:
         raise NotFoundException(f"Appraisal with id:{appraisal_id} not found")
-    if appraisal.status!= AppraisalStatus.Initiated:
-        raise BadRequestException(f"Appraisal in progress")
+    if appraisal.status != AppraisalStatus.Initiated:
+        raise BadRequestException("Appraisal in progress")
     appraisal.deleted_at = datetime.now()
     await repo.soft_delete_appraisal(appraisal, db)
     return
 
+
 async def create_or_update_idp(db: AsyncSession, appraisal_id: int, idp_text: str) -> Appraisal:
     appraisal = await repo.get_appraisal_by_id(db, appraisal_id)
     if not appraisal:
-        raise NotFoundException(f"Appraisal with ID {appraisal_id} not found."
-        )
-        
+        raise NotFoundException(f"Appraisal with ID {appraisal_id} not found.")
+
     if appraisal.status != AppraisalStatus.FeedbackSubmitted:
-        raise BadRequestException(f"IDP updates allowed only when status is '{AppraisalStatus.FeedbackSubmitted}'"
-        )
-        
+        raise BadRequestException(f"IDP updates allowed only when status is '{AppraisalStatus.FeedbackSubmitted}'")
+
     return await repo.update_appraisal_idp(db, appraisal, idp_text=idp_text)
 
 
@@ -74,12 +74,15 @@ async def create_or_update_meeting_notes(db: AsyncSession, appraisal_id: int, me
     appraisal = await repo.get_appraisal_by_id(db, appraisal_id)
     if not appraisal:
         raise NotFoundException(f"Appraisal with ID {appraisal_id} not found.")
-        
+
     allowed_statuses = [AppraisalStatus.FeedbackSubmitted, AppraisalStatus.MeetingDone]
     if appraisal.status not in allowed_statuses:
-        raise BadRequestException("Meeting notes operations are allowed only when status is 'Feedback Submitted' or 'Meeting Done'.")
-        
+        raise BadRequestException(
+            "Meeting notes operations are allowed only when status is 'Feedback Submitted' or 'Meeting Done'."
+        )
+
     return await repo.update_appraisal_hr_notes(db, appraisal, hr_notes=meeting_notes)
+
 
 async def get_idp_text(db: AsyncSession, appraisal_id: int) -> Appraisal:
     appraisal = await repo.get_appraisal_by_id(db, appraisal_id)
@@ -87,16 +90,18 @@ async def get_idp_text(db: AsyncSession, appraisal_id: int) -> Appraisal:
         raise NotFoundException(f"Appraisal with ID {appraisal_id} not found.")
     return appraisal
 
+
 async def get_meeting_notes(db: AsyncSession, appraisal_id: int) -> Appraisal:
     appraisal = await repo.get_appraisal_by_id(db, appraisal_id)
     if not appraisal:
         raise NotFoundException(f"Appraisal with ID {appraisal_id} not found.")
     return appraisal
 
+
 async def get_filtered_employee_history(db: AsyncSession, employee_id: int) -> List[dict]:
     appraisals = await repo.get_employee_appraisal_history(db, employee_id)
     processed_history = []
-    
+
     for app in appraisals:
         final_idp = None
         final_notes = None
@@ -105,30 +110,30 @@ async def get_filtered_employee_history(db: AsyncSession, employee_id: int) -> L
         elif app.status == AppraisalStatus.Done:
             final_idp = app.idp_text
             final_notes = app.hr_notes
-            
-        processed_history.append({
-            "id": app.id,
-            "employee_id": app.employee_id,
-            "status": app.status,
-            "idp_text": final_idp,
-            "meeting_notes": final_notes,
-            "created_at": app.created_at, 
-            "cycle_details": {
-                "cycle_id": app.cycle.id,
-                "cycle_name": app.cycle.name,
-                "start_date": app.cycle.start_date,
-                "end_date": app.cycle.end_date,
-                "cycle_status": app.cycle.status
+
+        processed_history.append(
+            {
+                "id": app.id,
+                "employee_id": app.employee_id,
+                "status": app.status,
+                "idp_text": final_idp,
+                "meeting_notes": final_notes,
+                "created_at": app.created_at,
+                "cycle_details": {
+                    "cycle_id": app.cycle.id,
+                    "cycle_name": app.cycle.name,
+                    "start_date": app.cycle.start_date,
+                    "end_date": app.cycle.end_date,
+                    "cycle_status": app.cycle.status,
+                },
             }
-        })
-        
+        )
+
     return processed_history
 
+
 async def transition_appraisal_status(
-    db: AsyncSession, 
-    appraisal_id: int, 
-    target_status: AppraisalStatus,
-    current_user: TokenPayload
+    db: AsyncSession, appraisal_id: int, target_status: AppraisalStatus, current_user: TokenPayload
 ) -> Appraisal:
     appraisal = await repo.get_detailed_appraisal_by_id(db, appraisal_id)
     if not appraisal:
@@ -153,10 +158,10 @@ async def transition_appraisal_status(
     elif target_status == AppraisalStatus.FeedbackSubmitted:
         if current_status != AppraisalStatus.InitiateFeedback:
             raise BadRequestException("Can only transition to 'Feedback Submitted' from 'Initiate Feedback' state.")
-        
+
         if not appraisal.lead_assignments:
             raise BadRequestException("No lead assignments found for this appraisal.")
-            
+
         has_pending = any(a.status != AssignmentStatus.Submitted for a in appraisal.lead_assignments)
         if has_pending:
             raise BadRequestException("All related lead assignments must be marked as 'Submitted'.")

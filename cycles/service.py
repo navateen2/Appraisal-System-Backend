@@ -56,7 +56,7 @@ async def update_cycle_status(cycle_id: int, body: CycleStatusUpdate, db: AsyncS
                 )
 
     cycle.status = body.status
-    await repo.save_changes(db)
+    await repo.save_changes(db, instance=cycle)
     return cycle
 
 

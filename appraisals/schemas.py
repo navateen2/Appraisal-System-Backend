@@ -81,4 +81,4 @@ class UpdateStatusRequest(BaseModel):
 
 class UpdateStatusResponse(BaseModel):
     message: str
-    current_status: AppraisalStatus
+    status: AppraisalStatus
