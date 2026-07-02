@@ -3,6 +3,7 @@ import datetime
 from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
+from exceptions import NotFoundException
 from models.appraisal import Appraisal, AppraisalStatus
 from models.appraisal_lead_assignment import AppraisalLeadAssignment, AssignmentStatus
 from models.cycles import Cycles
@@ -146,3 +147,69 @@ async def get_pending_assignments_by_lead_id(
 
     result = await db.execute(stmt)
     return result.mappings().all()
+
+
+async def get_assignments_by_lead_id(
+    lead_id: int,
+    db: AsyncSession,
+):
+    stmt = (
+        select(
+            AppraisalLeadAssignment.id,
+            AppraisalLeadAssignment.appraisal_id,
+            AppraisalLeadAssignment.lead_id,
+            Appraisal.employee_id,
+            User.name.label("employee_name"),
+            AppraisalLeadAssignment.status,
+            AppraisalLeadAssignment.assigned_by,
+            AppraisalLeadAssignment.created_at,
+            Cycles.start_date,
+            Cycles.end_date,
+        )
+        .select_from(AppraisalLeadAssignment)
+        .join(
+            Appraisal,
+            Appraisal.id == AppraisalLeadAssignment.appraisal_id,
+        )
+        .join(
+            Cycles,
+            Cycles.id == Appraisal.cycle_id,
+        )
+        .join(
+            User,
+            User.id == Appraisal.employee_id,
+        )
+        .where(
+            AppraisalLeadAssignment.lead_id == lead_id,
+            AppraisalLeadAssignment.deleted_at.is_(None),
+            Appraisal.deleted_at.is_(None),
+            Cycles.deleted_at.is_(None),
+            User.deleted_at.is_(None),
+        )
+    )
+
+    result = await db.execute(stmt)
+    return result.mappings().all()
+
+
+async def get_employee_by_mapping_id(
+    db: AsyncSession,
+    mapping_id: int,
+):
+    stmt = (
+        select(User)
+        .join(Appraisal, Appraisal.employee_id == User.id)
+        .join(
+            AppraisalLeadAssignment,
+            AppraisalLeadAssignment.appraisal_id == Appraisal.id,
+        )
+        .where(AppraisalLeadAssignment.id == mapping_id)
+    )
+
+    result = await db.execute(stmt)
+    employee = result.scalar_one_or_none()
+
+    if employee is None:
+        raise NotFoundException("Employee not found.")
+
+    return employee

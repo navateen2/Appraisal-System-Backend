@@ -146,3 +146,38 @@ async def get_pending_assignments_for_lead(lead_id: int, current_user_id: int, d
         }
         for entry in assignments
     ]
+
+
+async def get_assignments_for_lead(lead_id: int, current_user_id: int, db: AsyncSession):
+    if lead_id != current_user_id:
+        raise ForbiddenException("Access denied: You cannot view pending assignments for another user.")
+
+    assignments = await repo.get_assignments_by_lead_id(lead_id, db)
+    print(assignments)
+
+    return [
+        {
+            "id": entry.id,
+            "appraisal_id": entry.appraisal_id,
+            "lead_id": entry.lead_id,
+            "employee_id": entry.employee_id,
+            "employee_name": entry.employee_name,
+            "assigned_by": entry.assigned_by,
+            "status": entry.status,
+            "created_at": entry.created_at,
+            "deleted_at": entry.get("deleted_at"),
+            "start_date": entry.start_date,
+            "end_date": entry.end_date,
+        }
+        for entry in assignments
+    ]
+
+
+async def get_employee_by_mapping_id(
+    db: AsyncSession,
+    mapping_id: int,
+):
+    return await repo.get_employee_by_mapping_id(
+        db=db,
+        mapping_id=mapping_id,
+    )

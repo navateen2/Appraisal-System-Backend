@@ -1,9 +1,6 @@
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from auth.dependencies import get_current_user
 from auth.schemas import TokenPayload
-from database.connection import get_db
 
 from . import service
 from .schemas import (
