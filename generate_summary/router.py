@@ -7,6 +7,7 @@ from database.connection import get_db
 
 from . import service
 from generate_summary.schemas import (
+    AppraisalSummaryDataResponse,
     AppraisalSummaryRequest,
     AppraisalSummaryResponse,
     CycleSummaryResponse,
@@ -58,3 +59,26 @@ async def get_cycle_appraisal_summaries(
         db=db,
         cycle_id=cycle_id,
     )
+
+@router.get(
+    "/appraisal-summary/{appraisal_id}/data",
+    response_model=AppraisalSummaryDataResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_appraisal_summary_data(
+    appraisal_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    data = await service.get_appraisal_summary_details(
+        db=db,
+        appraisal_id=appraisal_id,
+    )
+
+    if data is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Appraisal not found.",
+        )
+
+    return data

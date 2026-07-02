@@ -157,3 +157,55 @@ async def get_cycle_appraisal_summaries(
         db=db,
         cycle_id=cycle_id,
     )
+
+async def get_appraisal_summary_details(
+    db: AsyncSession,
+    appraisal_id: int,
+):
+    rows = await repo.get_appraisal_summary_data(
+        db=db,
+        appraisal_id=appraisal_id,
+    )
+
+    if not rows:
+        return None
+
+    first = rows[0]
+
+    leads = {}
+
+    for row in rows:
+        assignment_id = row["assignment_id"]
+
+        if assignment_id not in leads:
+            leads[assignment_id] = {
+                "assignment_id": assignment_id,
+                "lead_id": row["lead_id"],
+                "lead_name": row["lead_name"],
+                "feedback": [],
+            }
+
+        if row["competency_name"] is not None:
+            leads[assignment_id]["feedback"].append(
+                {
+                    "competency_name": row["competency_name"],
+                    "score": row["score"],
+                    "strengths": row["strengths"],
+                    "improvements": row["improvements"],
+                }
+            )
+
+    return {
+        "appraisal_id": first["appraisal_id"],
+        "cycle_id": first["cycle_id"],
+        "cycle_name": first["cycle_name"],
+        "employee_id": first["employee_id"],
+        "employee_name": first["employee_name"],
+        "hr_notes": first["hr_notes"],
+        "idp_text": first["idp_text"],
+        "self_appraisal_id": first["self_appraisal_id"],
+        "accomplishments": first["accomplishments"],
+        "challenges": first["challenges"],
+        "career_aspirations": first["career_aspirations"],
+        "lead_feedback": list(leads.values()),
+    }
