@@ -152,8 +152,6 @@ async def get_appraisal_meeting_notes(appraisal_id: int, db: AsyncSession = Depe
 async def get_user_appraisals_history(
     user_id: int, db: AsyncSession = Depends(get_db), current_user: TokenPayload = Depends(get_current_user)
 ):
-    if current_user.id != user_id:
-        raise ForbiddenException("Access Denied: You cannot view appraisal histories belonging to other accounts.")
 
     return await service.get_filtered_employee_history(db, user_id)
 
