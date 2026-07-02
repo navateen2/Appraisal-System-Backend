@@ -46,3 +46,4 @@ class SubmitFeedbackResponse(BaseModel):
 class EmployeeInfoResponse(BaseModel):
     id: int
     name: str
+    status: str

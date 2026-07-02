@@ -4,6 +4,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from exceptions import NotFoundException
+from lead_assignments.schemas import EmployeeInfoResponse
 from models.appraisal import Appraisal, AppraisalStatus
 from models.appraisal_lead_assignment import AppraisalLeadAssignment, AssignmentStatus
 from models.cycles import Cycles
@@ -197,7 +198,7 @@ async def get_employee_by_mapping_id(
     mapping_id: int,
 ):
     stmt = (
-        select(User)
+        select(User, Appraisal.status)
         .join(Appraisal, Appraisal.employee_id == User.id)
         .join(
             AppraisalLeadAssignment,
@@ -207,9 +208,10 @@ async def get_employee_by_mapping_id(
     )
 
     result = await db.execute(stmt)
-    employee = result.scalar_one_or_none()
 
-    if employee is None:
+    row = result.tuples().one_or_none()
+    if row is None:
         raise NotFoundException("Employee not found.")
+    employee, appraisal_status = row
 
-    return employee
+    return EmployeeInfoResponse(id=employee.id, name=employee.name, status=appraisal_status)
